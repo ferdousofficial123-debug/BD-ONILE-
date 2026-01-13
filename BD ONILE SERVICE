@@ -1,0 +1,63 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // ফায়ারবেস প্যাকেজ
+
+void main() => runApp(AdminApp());
+
+class AdminApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.red),
+      home: AdminDashboard(),
+    );
+  }
+}
+
+class AdminDashboard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("অ্যাডমিন প্যানেল: মোঃ ফেরদৌস আলম"),
+        centerTitle: true,
+      ),
+      body: StreamBuilder(
+        // 'users' কালেকশন থেকে রিয়েল-টাইম ডেটা আসবে
+        stream: FirebaseFirestore.instance.collection('users').snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+
+          return Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  "নিবন্ধিত ইউজারদের তালিকা",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    var userData = snapshot.data!.docs[index];
+                    return Card(
+                      margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                      child: ListTile(
+                        leading: CircleAvatar(backgroundColor: Colors.red, child: Icon(Icons.person, color: Colors.white)),
+                        title: Text(userData['name']),
+                        subtitle: Text(userData['phone']),
+                        trailing: Icon(Icons.verified_user, color: Colors.green),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
